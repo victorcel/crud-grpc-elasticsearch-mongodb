@@ -21,7 +21,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	listenServer, err := net.Listen("tcp", ":8000")
+	listenServer, err := net.Listen("tcp", ":"+os.Getenv("PORT"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func main() {
 
 	reflection.Register(serverGrpc)
 
-	fmt.Println("Server run 8000")
+	fmt.Println("Server run" + os.Getenv("PORT"))
 
 	if err := serverGrpc.Serve(listenServer); err != nil {
 		log.Fatalf("Error serving: %s", err.Error())

@@ -8,5 +8,5 @@ RUN go mod download && go mod verify
 COPY . .
 RUN go build -o app .
 
-EXPOSE 5050
+EXPOSE 8080
 CMD ["./app"]

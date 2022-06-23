@@ -15,6 +15,6 @@ test:
 	@go test ./... --cover
 ## docker compose
 up:
-	docker-compose up --build
+	docker-compose up -d --build
 down:
 	docker-compose down --remove-orphans
