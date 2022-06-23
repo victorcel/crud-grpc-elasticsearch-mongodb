@@ -10,3 +10,19 @@ message User{
   string email = 3;
   int64 ega = 4;
 }
+
+message UserRequest{
+  string id = 1;
+}
+
+message UserResponse{
+  bool id = 1;
+}
+
+service UserService {
+    rpc InsertUser(User) returns (UserResponse);
+    rpc GetUserByID(UserRequest) returns (User);
+    rpc UpdateUser(User) returns (UserResponse);
+    rpc DeleteUser(UserRequest) returns (UserResponse);
+
+}
