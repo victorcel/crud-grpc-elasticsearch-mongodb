@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserResponse, error)
+	InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserByIdResponse, error)
 	GetUserByID(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserResponse, error)
 	DeleteUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
@@ -36,8 +36,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserResponse, error) {
-	out := new(UserResponse)
+func (c *userServiceClient) InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserByIdResponse, error) {
+	out := new(UserByIdResponse)
 	err := c.cc.Invoke(ctx, "/user.UserService/InsertUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *UserRequest, opt
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	InsertUser(context.Context, *User) (*UserResponse, error)
+	InsertUser(context.Context, *User) (*UserByIdResponse, error)
 	GetUserByID(context.Context, *UserRequest) (*User, error)
 	UpdateUser(context.Context, *User) (*UserResponse, error)
 	DeleteUser(context.Context, *UserRequest) (*UserResponse, error)
@@ -87,7 +87,7 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) InsertUser(context.Context, *User) (*UserResponse, error) {
+func (UnimplementedUserServiceServer) InsertUser(context.Context, *User) (*UserByIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InsertUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserByID(context.Context, *UserRequest) (*User, error) {
