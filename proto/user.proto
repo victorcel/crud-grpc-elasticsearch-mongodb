@@ -15,14 +15,22 @@ message UserRequest{
   string id = 1;
 }
 
+message UserByIdResponse{
+  string id = 1;
+}
+
 message UserResponse{
-  bool id = 1;
+  bool result = 1;
+}
+
+message UserResponseError {
+  string message = 1;
 }
 
 service UserService {
-    rpc InsertUser(User) returns (UserResponse);
-    rpc GetUserByID(UserRequest) returns (User);
-    rpc UpdateUser(User) returns (UserResponse);
-    rpc DeleteUser(UserRequest) returns (UserResponse);
+  rpc InsertUser(User) returns (UserByIdResponse);
+  rpc GetUserByID(UserRequest) returns (User);
+  rpc UpdateUser(User) returns (UserResponse);
+  rpc DeleteUser(UserRequest) returns (UserResponse);
 
 }
