@@ -19,10 +19,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+      - "8090:8090"
     restart: unless-stopped
     depends_on:
       - mongodb
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:6.2.3"
+    ports:
+      - "9200:9200"
     environment:
       - "discovery.type=single-node"

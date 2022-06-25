@@ -1,48 +1,10 @@
 package main
 
-import (
-	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/victorcel/crud-grpc-elasticsearch-mongodb/database"
-	userpb "github.com/victorcel/crud-grpc-elasticsearch-mongodb/proto"
-	"github.com/victorcel/crud-grpc-elasticsearch-mongodb/server"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"log"
-	"net"
-	"os"
-)
+import "github.com/victorcel/crud-grpc-elasticsearch-mongodb/server"
 
 func main() {
-	fmt.Println("Iniciado servidor...")
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	listenServer, err := net.Listen("tcp", ":"+os.Getenv("PORT"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	repository, err := database.NewMongoDbRepository(os.Getenv("DATABASE_URL"))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	serverMain := server.NewServer(repository)
-
-	serverGrpc := grpc.NewServer()
-	userpb.RegisterUserServiceServer(serverGrpc, serverMain)
-
-	reflection.Register(serverGrpc)
-
-	fmt.Println("Server run" + os.Getenv("PORT"))
-
-	if err := serverGrpc.Serve(listenServer); err != nil {
-		log.Fatalf("Error serving: %s", err.Error())
-	}
-
+	quit := make(chan bool, 2)
+	go server.InitializeMongoDBServer()
+	go server.InitializeElasticServer()
+	<-quit
 }
