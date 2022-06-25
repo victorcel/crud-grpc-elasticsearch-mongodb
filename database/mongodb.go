@@ -36,10 +36,6 @@ func NewMongoDbRepository(url string) (*MongoDbRepository, error) {
 	return &MongoDbRepository{db}, nil
 }
 
-func (repository *MongoDbRepository) Close() error {
-	return repository.db.Client().Disconnect(context.Background())
-}
-
 func (repository *MongoDbRepository) InsertUser(ctx context.Context, user *models.User) (string, error) {
 	result, err := repository.db.Collection(CollectionName).InsertOne(ctx, user)
 
@@ -100,4 +96,8 @@ func (repository *MongoDbRepository) DeleteUser(ctx context.Context, id string) 
 		return nil, err
 	}
 	return deleteOne, nil
+}
+
+func (repository *MongoDbRepository) Close() error {
+	return repository.db.Client().Disconnect(context.Background())
 }
