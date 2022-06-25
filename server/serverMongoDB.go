@@ -20,16 +20,14 @@ import (
 )
 
 type ServerMongoDB struct {
-	repository repository.UserRepository
 	userProtoBuff.UnimplementedUserServiceServer
 	validate *validator.Validate
 }
 
-func NewServerMongoDB(repository repository.UserRepository) *ServerMongoDB {
+func NewServerMongoDB() *ServerMongoDB {
 	validate := validator.New()
 	return &ServerMongoDB{
-		repository: repository,
-		validate:   validate,
+		validate: validate,
 	}
 }
 
@@ -46,15 +44,18 @@ func InitializeMongoDBServer() {
 		log.Fatal(err)
 	}
 
-	repository, err := database.NewMongoDbRepository(os.Getenv("DATABASE_URL"))
+	dbRepository, err := database.NewMongoDbRepository(os.Getenv("DATABASE_URL"))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	serverMain := NewServerMongoDB(repository)
+	repository.SetUserRepository(dbRepository)
+
+	serverMain := NewServerMongoDB()
 
 	serverGrpc := grpc.NewServer()
+
 	userProtoBuff.RegisterUserServiceServer(serverGrpc, serverMain)
 
 	reflection.Register(serverGrpc)
@@ -80,7 +81,7 @@ func (s *ServerMongoDB) InsertUser(ctx context.Context, request *userProtoBuff.U
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	userResponse, err := s.repository.InsertUser(ctx, user)
+	userResponse, err := repository.InsertUser(ctx, user)
 
 	if err != nil {
 		return nil, err
@@ -93,7 +94,7 @@ func (s *ServerMongoDB) InsertUser(ctx context.Context, request *userProtoBuff.U
 
 func (s *ServerMongoDB) GetUserByID(ctx context.Context, request *userProtoBuff.UserRequest) (*userProtoBuff.User, error) {
 
-	userResponse, err := s.repository.GetUserByID(ctx, request.GetId())
+	userResponse, err := repository.GetUserByID(ctx, request.GetId())
 
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -108,7 +109,7 @@ func (s *ServerMongoDB) GetUserByID(ctx context.Context, request *userProtoBuff.
 }
 
 func (s *ServerMongoDB) UpdateUser(ctx context.Context, request *userProtoBuff.User) (*userProtoBuff.UserResponse, error) {
-	_, err := s.repository.UpdateUser(ctx, request.GetId(), request.GetName())
+	_, err := repository.UpdateUser(ctx, request.GetId(), request.GetName())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -119,7 +120,7 @@ func (s *ServerMongoDB) UpdateUser(ctx context.Context, request *userProtoBuff.U
 func (s *ServerMongoDB) DeleteUser(ctx context.Context, request *userProtoBuff.UserRequest) (
 	*userProtoBuff.UserResponse, error,
 ) {
-	_, err := s.repository.DeleteUser(ctx, request.GetId())
+	_, err := repository.DeleteUser(ctx, request.GetId())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}

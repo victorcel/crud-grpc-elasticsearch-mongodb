@@ -21,15 +21,14 @@ import (
 )
 
 type ServerElasticDB struct {
-	repository repository.UserElasticRepository
 	userProtoBuff.UnimplementedUserServiceServer
 	validate *validator.Validate
 }
 
-func NewServerElasticDB(repository repository.UserElasticRepository) *ServerElasticDB {
+func NewServerElasticDB() *ServerElasticDB {
 	validate := validator.New()
 	return &ServerElasticDB{
-		repository: repository, validate: validate,
+		validate: validate,
 	}
 }
 
@@ -58,9 +57,12 @@ func InitializeElasticServer() {
 		log.Fatalln(err)
 	}
 
-	serverMain := NewServerElasticDB(&storage)
+	serverMain := NewServerElasticDB()
+
+	repository.SetUserElasticRepository(&storage)
 
 	serverGrpc := grpc.NewServer()
+
 	userProtoBuff.RegisterUserServiceServer(serverGrpc, serverMain)
 
 	reflection.Register(serverGrpc)
@@ -86,7 +88,7 @@ func (s *ServerElasticDB) InsertUser(ctx context.Context, request *userProtoBuff
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	userResponse, err := s.repository.InsertUserElastic(ctx, user)
+	userResponse, err := repository.InsertUserElastic(ctx, user)
 
 	if err != nil {
 		return nil, err
@@ -99,7 +101,7 @@ func (s *ServerElasticDB) InsertUser(ctx context.Context, request *userProtoBuff
 
 func (s *ServerElasticDB) GetUserByID(ctx context.Context, request *userProtoBuff.UserRequest) (*userProtoBuff.User, error) {
 
-	userResponse, err := s.repository.GetUserElasticByID(ctx, request.GetId())
+	userResponse, err := repository.GetUserElasticByID(ctx, request.GetId())
 
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -126,7 +128,7 @@ func (s *ServerElasticDB) UpdateUser(ctx context.Context, request *userProtoBuff
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	err = s.repository.UpdateUserElastic(ctx, *user)
+	err = repository.UpdateUserElastic(ctx, *user)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -137,7 +139,7 @@ func (s *ServerElasticDB) UpdateUser(ctx context.Context, request *userProtoBuff
 func (s *ServerElasticDB) DeleteUser(ctx context.Context, request *userProtoBuff.UserRequest) (
 	*userProtoBuff.UserResponse, error,
 ) {
-	err := s.repository.DeleteUserElastic(ctx, request.GetId())
+	err := repository.DeleteUserElastic(ctx, request.GetId())
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
